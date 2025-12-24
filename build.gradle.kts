@@ -14,7 +14,7 @@ group = "es.rafapuig.pmdm"
 version = "0.0.1"
 
 application {
-    mainClass = "ApplicationKt"
+    mainClass = "io.ktor.server.netty.EngineMain"
 }
 
 dependencies {
