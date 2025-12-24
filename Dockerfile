@@ -20,7 +20,8 @@ WORKDIR /app
 COPY . .
 
 # Construye el jar (sin tests para acelerar)
-RUN ./gradlew clean build -x test
+#RUN ./gradlew clean buildFatJar -x test
+RUN gradle buildFatJar --no-daemon
 
 # Stage 2: run
 FROM eclipse-temurin:17-jre
