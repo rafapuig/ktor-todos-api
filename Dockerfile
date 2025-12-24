@@ -14,7 +14,7 @@
 #WORKDIR /app
 
 # Stage 1: build
-FROM eclipse-temurin:17-jdk AS builder
+FROM gradle:8-jdk17 AS build
 WORKDIR /app
 
 COPY . .
@@ -28,7 +28,7 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Copiamos el JAR generado en stage 1
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 ENV PORT=8080
 EXPOSE 8080
