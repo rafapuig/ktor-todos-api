@@ -13,27 +13,24 @@
 #FROM eclipse-temurin:17-jdk AS builder
 #WORKDIR /app
 
-# ======= Stage 1: Build =======
+# Stage 1: build
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
 
-# Copiamos todo el proyecto
 COPY . .
 
-# Construimos el JAR (sin tests para acelerar)
+# Construye el jar (sin tests para acelerar)
 RUN ./gradlew clean build -x test
 
-# ======= Stage 2: Run =======
+# Stage 2: run
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Copiamos solo el JAR generado
+# Copiamos el JAR generado en stage 1
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Puerto que Railway inyecta
 ENV PORT=8080
 EXPOSE 8080
 
-# Ejecutar la aplicación
 CMD ["java", "-jar", "app.jar"]
 
