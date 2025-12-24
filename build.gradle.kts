@@ -8,6 +8,10 @@ plugins {
     id("io.ktor.plugin") version "3.3.2"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
     application
+    // En build.gradle.kts
+
+        id("com.github.johnrengelman.shadow") version "8.1.1"
+
 }
 
 group = "es.rafapuig.pmdm"

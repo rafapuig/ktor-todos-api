@@ -13,25 +13,38 @@
 #FROM eclipse-temurin:17-jdk AS builder
 #WORKDIR /app
 
-# Stage 1: build
-FROM gradle:8-jdk17 AS build
-WORKDIR /app
+# --- Fase 1: Construcción (Build Stage) ---
+# Usamos una imagen de Gradle con JDK 17. Ajusta la versión si usas otra.
+FROM gradle:8.5.0-jdk17 AS build
 
-COPY . .
+# Establecemos el directorio de trabajo dentro del contenedor
+WORKDIR /home/gradle/src
 
-# Construye el jar (sin tests para acelerar)
-#RUN ./gradlew clean buildFatJar -x test
-RUN gradle buildFatJar --no-daemon
+# Copiamos los ficheros de configuración de Gradle para descargar dependencias
+COPY build.gradle.kts settings.gradle.kts ./
+COPY src ./src
 
-# Stage 2: run
-FROM eclipse-temurin:17-jre
-WORKDIR /app
+# Comando para construir la aplicación y empaquetarla en un 'fat JAR'
+# El 'shadowJar' es un JAR que contiene todas las dependencias.
+# Necesitas el plugin 'com.github.johnrengelman.shadow' en tu build.gradle.kts
+RUN gradle shadowJar --no-daemon
 
-# Copiamos el JAR generado en stage 1
-COPY --from=build /app/build/libs/*-all.jar app.jar
+# --- Fase 2: Ejecución (Runtime Stage) ---
+# Usamos una imagen de Java más ligera, ya que no necesitamos Gradle para ejecutar
+FROM openjdk:17-jdk-slim
 
-ENV PORT=8080
+# Exponemos el puerto 8080. Railway lo mapeará automáticamente a su variable $PORT
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.jar"]
+# Copiamos solo el JAR compilado desde la fase de construcción
+COPY --from=build /home/gradle/src/build/libs/*.jar /app/app.jar
+
+# Establecemos el directorio de trabajo final
+WORKDIR /app
+
+# El comando que ejecutará Railway para iniciar tu servidor
+# java -jar /app/app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
 
